@@ -3,7 +3,9 @@ import { createRoot } from "react-dom/client";
 import {
   Sprout, Droplets, Wheat, Leaf, LayoutDashboard, Package,
   History, Bot, Bell, UserRound, LogOut, Plus, Tractor,
-  CheckCircle2, Clock3, ShieldCheck
+  CheckCircle2, Clock3, ShieldCheck,
+  Search, Filter, ArrowDownToLine, ArrowUpFromLine,
+  AlertTriangle, Boxes, PackageCheck, X, CalendarDays
 } from "lucide-react";
 import "./styles.css";
 
@@ -35,8 +37,42 @@ function App() {
     "Plot A-01 needs watering."
   ]);
   const [inventory, setInventory] = useState([
-    { item: "Carrot", quantity: 12 },
-    { item: "Tomato", quantity: 6 }
+    {
+      id: 1,
+      item: "Carrot",
+      category: "Vegetables",
+      quantity: 12,
+      unit: "kg",
+      harvested: "2026-09-08",
+      note: "Fresh harvest"
+    },
+    {
+      id: 2,
+      item: "Tomato",
+      category: "Vegetables",
+      quantity: 6,
+      unit: "kg",
+      harvested: "2026-09-07",
+      note: "Fresh harvest"
+    },
+    {
+      id: 3,
+      item: "Corn",
+      category: "Grains",
+      quantity: 3,
+      unit: "kg",
+      harvested: "2026-09-06",
+      note: "Fresh harvest"
+    },
+    {
+      id: 4,
+      item: "Potato",
+      category: "Vegetables",
+      quantity: 0,
+      unit: "kg",
+      harvested: "2026-09-02",
+      note: "Out of stock"
+    }
   ]);
 
   function handleLogin(user) {
@@ -101,8 +137,28 @@ function App() {
     setInventory(items => {
       const found = items.find(x => x.item === p.crop);
       return found
-        ? items.map(x => x.item === p.crop ? { ...x, quantity: x.quantity + 5 } : x)
-        : [...items, { item: p.crop, quantity: 5 }];
+        ? items.map(x =>
+          x.item === p.crop
+            ? {
+              ...x,
+              quantity: x.quantity + 5,
+              harvested: new Date().toISOString().slice(0, 10),
+              note: "Fresh harvest"
+            }
+            : x
+        )
+        : [
+          ...items,
+          {
+            id: Date.now(),
+            item: p.crop,
+            category: "Vegetables",
+            quantity: 5,
+            unit: "kg",
+            harvested: new Date().toISOString().slice(0, 10),
+            note: "Fresh harvest"
+          }
+        ];
     });
     updatePlot(id, { crop: null, stage: "Rented", progress: 0, ready: false, water: false, fertilizer: false });
     setNotifications(ns => [`Harvested ${p.crop} from ${p.name}.`, ...ns]);
@@ -220,8 +276,657 @@ function PlotCard({ plot, rentPlot, plantCrop, action, harvest }) {
   </article>
 }
 
-function Inventory({ inventory }) {
-  return <div className="content"><div className="pageIntro"><h2>Harvested Inventory</h2><p>Resources collected from your farm.</p></div><div className="inventoryGrid">{inventory.map(x => <div className="inventoryItem" key={x.item}><div className="itemIcon">📦</div><div><b>{x.item}</b><span>{x.quantity} units</span></div></div>)}</div></div>
+function Inventory({ inventory, setInventory }) {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [status, setStatus] = useState("All");
+  const [modal, setModal] = useState(null);
+  const [exportQuantity, setExportQuantity] = useState("");
+
+  const [form, setForm] = useState({
+    item: "",
+    category: "Vegetables",
+    quantity: "",
+    unit: "kg",
+    harvested: new Date().toISOString().slice(0, 10),
+    note: ""
+  });
+
+  const categories = [
+    "All",
+    ...new Set(inventory.map(x => x.category))
+  ];
+
+  function getStatus(quantity) {
+    if (quantity === 0) {
+      return {
+        label: "Out of stock",
+        className: "out"
+      };
+    }
+
+    if (quantity <= 5) {
+      return {
+        label: "Low stock",
+        className: "low"
+      };
+    }
+
+    return {
+      label: "In stock",
+      className: "good"
+    };
+  }
+
+  const filteredInventory = inventory.filter(item => {
+    const matchesSearch = item.item
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    const matchesCategory =
+      category === "All" || item.category === category;
+
+    const itemStatus = getStatus(item.quantity).className;
+
+    const matchesStatus =
+      status === "All" || itemStatus === status;
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
+
+  const totalTypes = inventory.length;
+
+  const totalQuantity = inventory.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+
+  const lowStock = inventory.filter(
+    item => item.quantity > 0 && item.quantity <= 5
+  ).length;
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const newHarvest = inventory.filter(
+    item => item.harvested === today
+  ).length;
+
+  function openImport() {
+    setForm({
+      item: "",
+      category: "Vegetables",
+      quantity: "",
+      unit: "kg",
+      harvested: today,
+      note: ""
+    });
+
+    setModal("import");
+  }
+
+  function submitImport(e) {
+    e.preventDefault();
+
+    if (!form.item || !form.quantity) return;
+
+    const quantity = Number(form.quantity);
+
+    const existing = inventory.find(
+      item => item.item.toLowerCase() === form.item.toLowerCase()
+    );
+
+    if (existing) {
+      setInventory(items =>
+        items.map(item =>
+          item.id === existing.id
+            ? {
+              ...item,
+              quantity: item.quantity + quantity,
+              category: form.category,
+              unit: form.unit,
+              harvested: form.harvested,
+              note: form.note || item.note
+            }
+            : item
+        )
+      );
+    } else {
+      setInventory(items => [
+        ...items,
+        {
+          id: Date.now(),
+          item: form.item,
+          category: form.category,
+          quantity,
+          unit: form.unit,
+          harvested: form.harvested,
+          note: form.note
+        }
+      ]);
+    }
+
+    setModal(null);
+  }
+
+  function openExport(item) {
+    setForm(item);
+    setExportQuantity("");
+    setModal("export");
+  }
+
+  function submitExport(e) {
+    e.preventDefault();
+
+    const quantity = Number(exportQuantity);
+
+    if (!quantity || quantity <= 0) return;
+
+    setInventory(items =>
+      items.map(item =>
+        item.id === form.id
+          ? {
+            ...item,
+            quantity: Math.max(0, item.quantity - quantity)
+          }
+          : item
+      )
+    );
+
+    setModal(null);
+  }
+
+  return (
+    <div className="content inventoryPage">
+
+      <div className="inventoryHeader">
+        <div className="pageIntro">
+          <h2>Inventory Management</h2>
+          <p>
+            Track harvested products and manage your farm inventory.
+          </p>
+        </div>
+
+        <button className="primary inventoryImportBtn" onClick={openImport}>
+          <ArrowDownToLine size={18} />
+          Import Stock
+        </button>
+      </div>
+
+      <section className="inventoryStats">
+
+        <div className="inventoryStat">
+          <div className="inventoryStatIcon">
+            <Boxes size={21} />
+          </div>
+
+          <div>
+            <strong>{totalTypes}</strong>
+            <span>Total Products</span>
+          </div>
+        </div>
+
+        <div className="inventoryStat">
+          <div className="inventoryStatIcon">
+            <PackageCheck size={21} />
+          </div>
+
+          <div>
+            <strong>{totalQuantity} kg</strong>
+            <span>Total Stock</span>
+          </div>
+        </div>
+
+        <div className="inventoryStat warning">
+          <div className="inventoryStatIcon">
+            <AlertTriangle size={21} />
+          </div>
+
+          <div>
+            <strong>{lowStock}</strong>
+            <span>Low Stock</span>
+          </div>
+        </div>
+
+        <div className="inventoryStat">
+          <div className="inventoryStatIcon">
+            <Wheat size={21} />
+          </div>
+
+          <div>
+            <strong>{newHarvest}</strong>
+            <span>New Harvest Today</span>
+          </div>
+        </div>
+
+      </section>
+
+      <div className="inventoryToolbar">
+
+        <div className="inventorySearch">
+          <Search size={18} />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="inventoryFilter">
+          <Filter size={17} />
+
+          <select
+            value={category}
+            onChange={e => setCategory(e.target.value)}
+          >
+            {categories.map(item => (
+              <option key={item} value={item}>
+                {item === "All" ? "All Categories" : item}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="inventoryFilter">
+
+          <select
+            value={status}
+            onChange={e => setStatus(e.target.value)}
+          >
+            <option value="All">All Status</option>
+            <option value="good">In Stock</option>
+            <option value="low">Low Stock</option>
+            <option value="out">Out of Stock</option>
+          </select>
+
+        </div>
+
+      </div>
+
+      <div className="inventoryTableCard">
+
+        <div className="inventoryTableHead">
+          <div>
+            <h3>Stock Overview</h3>
+            <p>{filteredInventory.length} products found</p>
+          </div>
+        </div>
+
+        <div className="inventoryTableWrap">
+
+          <table className="inventoryTable">
+
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Stock Level</th>
+                <th>Last Harvest</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              {filteredInventory.map(item => {
+
+                const itemStatus = getStatus(item.quantity);
+
+                const maxStock = 20;
+
+                const percent = Math.min(
+                  100,
+                  (item.quantity / maxStock) * 100
+                );
+
+                return (
+                  <tr key={item.id}>
+
+                    <td>
+                      <div className="productCell">
+
+                        <div className="productIcon">
+                          {item.item === "Carrot"
+                            ? "🥕"
+                            : item.item === "Tomato"
+                              ? "🍅"
+                              : item.item === "Corn"
+                                ? "🌽"
+                                : "📦"}
+                        </div>
+
+                        <div>
+                          <b>{item.item}</b>
+                          <span>{item.note || "Farm product"}</span>
+                        </div>
+
+                      </div>
+                    </td>
+
+                    <td>
+                      <span className="categoryTag">
+                        {item.category}
+                      </span>
+                    </td>
+
+                    <td>
+                      <strong className="quantityValue">
+                        {item.quantity}
+                      </strong>{" "}
+                      <span className="unitText">
+                        {item.unit}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className="stockLevel">
+
+                        <div className="stockBar">
+                          <i
+                            style={{
+                              width: `${percent}%`
+                            }}
+                          />
+                        </div>
+
+                        <span>
+                          {Math.round(percent)}%
+                        </span>
+
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="harvestDate">
+                        <CalendarDays size={15} />
+                        {item.harvested}
+                      </div>
+                    </td>
+
+                    <td>
+                      <span
+                        className={`inventoryStatus ${itemStatus.className}`}
+                      >
+                        {itemStatus.label}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className="inventoryActions">
+
+                        <button
+                          className="tableAction importAction"
+                          title="Import stock"
+                          onClick={() => {
+                            setForm({
+                              ...item,
+                              quantity: ""
+                            });
+
+                            setModal("import");
+                          }}
+                        >
+                          <ArrowDownToLine size={15} />
+                        </button>
+
+                        <button
+                          className="tableAction exportAction"
+                          title="Export stock"
+                          disabled={item.quantity === 0}
+                          onClick={() => openExport(item)}
+                        >
+                          <ArrowUpFromLine size={15} />
+                        </button>
+
+                      </div>
+                    </td>
+
+                  </tr>
+                );
+              })}
+
+            </tbody>
+
+          </table>
+
+          {filteredInventory.length === 0 && (
+            <div className="emptyInventory">
+              <Package size={40} />
+              <h3>No products found</h3>
+              <p>Try changing your search or filter.</p>
+            </div>
+          )}
+
+        </div>
+
+      </div>
+
+      {modal && (
+        <div className="inventoryModalOverlay">
+
+          <div className="inventoryModal">
+
+            <div className="modalHeader">
+
+              <div>
+                <h3>
+                  {modal === "import"
+                    ? "Import Stock"
+                    : "Export Stock"}
+                </h3>
+
+                <p>
+                  {modal === "import"
+                    ? "Add products to your inventory."
+                    : "Remove products from your inventory."}
+                </p>
+              </div>
+
+              <button
+                className="modalClose"
+                onClick={() => setModal(null)}
+              >
+                <X size={20} />
+              </button>
+
+            </div>
+
+            <form
+              onSubmit={
+                modal === "import"
+                  ? submitImport
+                  : submitExport
+              }
+            >
+
+              {modal === "import" && (
+                <>
+
+                  <label>
+                    Product name
+
+                    <input
+                      required
+                      value={form.item}
+                      onChange={e =>
+                        setForm({
+                          ...form,
+                          item: e.target.value
+                        })
+                      }
+                      placeholder="Example: Lettuce"
+                    />
+
+                  </label>
+
+                  <label>
+                    Category
+
+                    <select
+                      value={form.category}
+                      onChange={e =>
+                        setForm({
+                          ...form,
+                          category: e.target.value
+                        })
+                      }
+                    >
+                      <option>Vegetables</option>
+                      <option>Fruits</option>
+                      <option>Grains</option>
+                      <option>Other</option>
+                    </select>
+
+                  </label>
+
+                </>
+              )}
+
+              {modal === "export" && (
+                <div className="exportProductInfo">
+
+                  <div className="productIcon">
+                    {form.item === "Carrot"
+                      ? "🥕"
+                      : form.item === "Tomato"
+                        ? "🍅"
+                        : form.item === "Corn"
+                          ? "🌽"
+                          : "📦"}
+                  </div>
+
+                  <div>
+                    <b>{form.item}</b>
+
+                    <span>
+                      Available: {form.quantity} {form.unit}
+                    </span>
+                  </div>
+
+                </div>
+              )}
+
+              <div className="formRow">
+
+                <label>
+                  Quantity
+
+                  <input
+                    required
+                    min="1"
+                    max={modal === "export" ? form.quantity : undefined}
+                    type="number"
+                    value={
+                      modal === "export"
+                        ? exportQuantity
+                        : form.quantity
+                    }
+                    onChange={e => {
+                      if (modal === "export") {
+                        setExportQuantity(e.target.value);
+                      } else {
+                        setForm({
+                          ...form,
+                          quantity: e.target.value
+                        });
+                      }
+                    }}
+                    placeholder="0"
+                  />
+
+                </label>
+
+                <label>
+                  Unit
+
+                  <select
+                    value={form.unit}
+                    disabled={modal === "export"}
+                    onChange={e =>
+                      setForm({
+                        ...form,
+                        unit: e.target.value
+                      })
+                    }
+                  >
+                    <option>kg</option>
+                    <option>tons</option>
+                    <option>boxes</option>
+                    <option>units</option>
+                  </select>
+
+                </label>
+
+              </div>
+
+              {modal === "import" && (
+                <>
+                  <label>
+                    Harvest / Import Date
+
+                    <input
+                      type="date"
+                      value={form.harvested}
+                      onChange={e =>
+                        setForm({
+                          ...form,
+                          harvested: e.target.value
+                        })
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    Note
+
+                    <textarea
+                      rows="3"
+                      value={form.note}
+                      onChange={e =>
+                        setForm({
+                          ...form,
+                          note: e.target.value
+                        })
+                      }
+                      placeholder="Add a note..."
+                    />
+
+                  </label>
+                </>
+              )}
+
+              <div className="modalFooter">
+
+                <button
+                  type="button"
+                  className="secondaryBtn"
+                  onClick={() => setModal(null)}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="primary"
+                >
+                  {modal === "import"
+                    ? "Import Stock"
+                    : "Export Stock"}
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+      )}
+
+    </div>
+  );
 }
 
 function HistoryPage() {
