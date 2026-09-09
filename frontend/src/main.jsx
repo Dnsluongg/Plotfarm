@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   Sprout, Droplets, Wheat, Leaf, LayoutDashboard, Package,
@@ -36,6 +36,48 @@ function App() {
     "Plot A-02 is ready to harvest.",
     "Plot A-01 needs watering."
   ]);
+  const [history, setHistory] = useState(() => {
+    const savedHistory = localStorage.getItem("plotfarm_history");
+
+    return savedHistory
+      ? JSON.parse(savedHistory)
+      : [
+        {
+          id: 1,
+          timestamp: "2026-09-08T08:42:00",
+          action: "Harvest",
+          plot: "Plot A-02",
+          crop: "Carrot",
+          details: "Harvested 5 kg",
+          status: "Completed"
+        },
+        {
+          id: 2,
+          timestamp: "2026-09-08T08:15:00",
+          action: "Water",
+          plot: "Plot A-01",
+          crop: "Tomato",
+          details: "Watered successfully",
+          status: "Completed"
+        },
+        {
+          id: 3,
+          timestamp: "2026-09-07T16:20:00",
+          action: "Fertilize",
+          plot: "Plot B-01",
+          crop: "Corn",
+          details: "Fertilizer applied",
+          status: "Completed"
+        }
+      ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "plotfarm_history",
+      JSON.stringify(history)
+    );
+  }, [history]);
   const [inventory, setInventory] = useState([
     {
       id: 1,
@@ -112,42 +154,123 @@ function App() {
   function updatePlot(id, changes) {
     setPlots(ps => ps.map(p => p.id === id ? { ...p, ...changes } : p));
   }
+  function addHistory(action, plot, crop, details) {
+    const newHistory = {
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      action,
+      plot,
+      crop: crop || "—",
+      details,
+      status: "Completed"
+    };
+
+    setHistory(prev => [newHistory, ...prev]);
+  }
 
   function rentPlot(id) {
-    updatePlot(id, { stage: "Rented", crop: null });
-    setNotifications(ns => [`Plot #${id} has been rented.`, ...ns]);
+    const plot = plots.find(p => p.id === id);
+
+    updatePlot(id, {
+      stage: "Rented",
+      crop: null
+    });
+
+    setNotifications(ns => [
+      `Plot #${id} has been rented.`,
+      ...ns
+    ]);
+
+    addHistory(
+      "Rent",
+      plot?.name || `Plot #${id}`,
+      null,
+      "Plot rented successfully"
+    );
   }
 
   function plantCrop(id, crop) {
-    updatePlot(id, { crop, stage: "Seedling", progress: 8, ready: false });
-    setNotifications(ns => [`${crop} planted in Plot #${id}.`, ...ns]);
+    const plot = plots.find(p => p.id === id);
+
+    updatePlot(id, {
+      crop,
+      stage: "Seedling",
+      progress: 8,
+      ready: false
+    });
+
+    setNotifications(ns => [
+      `${crop} planted in Plot #${id}.`,
+      ...ns
+    ]);
+
+    addHistory(
+      "Plant",
+      plot?.name || `Plot #${id}`,
+      crop,
+      `${crop} planted successfully`
+    );
   }
 
   function action(id, type) {
     const p = plots.find(x => x.id === id);
+
     if (!p) return;
-    if (type === "water") updatePlot(id, { water: true, progress: Math.min(100, p.progress + 5) });
-    if (type === "fertilize") updatePlot(id, { fertilizer: true, progress: Math.min(100, p.progress + 8) });
-    setNotifications(ns => [`${type === "water" ? "Watered" : "Fertilized"} ${p.name}.`, ...ns]);
+
+    const actionName =
+      type === "water"
+        ? "Water"
+        : "Fertilize";
+
+    if (type === "water") {
+      updatePlot(id, {
+        water: true,
+        progress: Math.min(100, p.progress + 5)
+      });
+    }
+
+    if (type === "fertilize") {
+      updatePlot(id, {
+        fertilizer: true,
+        progress: Math.min(100, p.progress + 8)
+      });
+    }
+
+    setNotifications(ns => [
+      `${type === "water" ? "Watered" : "Fertilized"} ${p.name}.`,
+      ...ns
+    ]);
+
+    addHistory(
+      actionName,
+      p.name,
+      p.crop,
+      type === "water"
+        ? "Crop watered successfully"
+        : "Fertilizer applied successfully"
+    );
   }
 
   function harvest(id) {
-    const p = plots.find(x => x.id === id);
-    if (!p?.ready) return;
-    setInventory(items => {
-      const found = items.find(x => x.item === p.crop);
-      return found
-        ? items.map(x =>
+  const p = plots.find(x => x.id === id);
+
+  if (!p?.ready) return;
+
+  setInventory(items => {
+    const found = items.find(x => x.item === p.crop);
+
+    return found
+      ? items.map(x =>
           x.item === p.crop
             ? {
-              ...x,
-              quantity: x.quantity + 5,
-              harvested: new Date().toISOString().slice(0, 10),
-              note: "Fresh harvest"
-            }
+                ...x,
+                quantity: x.quantity + 5,
+                harvested: new Date().toISOString().slice(0, 10),
+                note: "Fresh harvest"
+              }
             : x
         )
-        : [
+      : [
           ...items,
           {
             id: Date.now(),
@@ -159,10 +282,30 @@ function App() {
             note: "Fresh harvest"
           }
         ];
-    });
-    updatePlot(id, { crop: null, stage: "Rented", progress: 0, ready: false, water: false, fertilizer: false });
-    setNotifications(ns => [`Harvested ${p.crop} from ${p.name}.`, ...ns]);
-  }
+  });
+
+  updatePlot(id, {
+    crop: null,
+    stage: "Rented",
+    progress: 0,
+    ready: false,
+    water: false,
+    fertilizer: false
+  });
+
+  setNotifications(ns => [
+    `Harvested ${p.crop} from ${p.name}.`,
+    ...ns
+  ]);
+
+  // Ghi lịch sử thu hoạch
+  addHistory(
+    "Harvest",
+    p.name,
+    p.crop,
+    "Harvested 5 kg"
+  );
+}
 
   return (
     <div className="app">
@@ -209,8 +352,19 @@ function App() {
         </header>
 
         {page === "farm" && <Farm plots={plots} rentPlot={rentPlot} plantCrop={plantCrop} action={action} harvest={harvest} automation={automation} />}
-        {page === "inventory" && <Inventory inventory={inventory} />}
-        {page === "history" && <HistoryPage />}
+        {page === "inventory" && (
+          <Inventory
+            inventory={inventory}
+            setInventory={setInventory}
+            addHistory={addHistory}
+          />
+        )}
+        {page === "history" && (
+          <HistoryPage
+            history={history}
+            setHistory={setHistory}
+          />
+        )}
         {page === "farmer" && <Farmer automation={automation} setAutomation={setAutomation} />}
         {page === "notifications" && <Notifications notifications={notifications} />}
       </main>
@@ -276,7 +430,11 @@ function PlotCard({ plot, rentPlot, plantCrop, action, harvest }) {
   </article>
 }
 
-function Inventory({ inventory, setInventory }) {
+function Inventory({
+  inventory,
+  setInventory,
+  addHistory
+}) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("All");
@@ -406,6 +564,13 @@ function Inventory({ inventory, setInventory }) {
     }
 
     setModal(null);
+
+    addHistory(
+      "Import Stock",
+      "Inventory",
+      form.item,
+      `Added ${quantity} ${form.unit} to inventory`
+    );
   }
 
   function openExport(item) {
@@ -430,6 +595,15 @@ function Inventory({ inventory, setInventory }) {
           }
           : item
       )
+    );
+
+    setModal(null);
+
+    addHistory(
+      "Export Stock",
+      "Inventory",
+      form.item,
+      `Exported ${quantity} ${form.unit} from inventory`
     );
 
     setModal(null);
@@ -929,9 +1103,285 @@ function Inventory({ inventory, setInventory }) {
   );
 }
 
-function HistoryPage() {
-  const rows = [["Today, 08:42", "Harvest", "Plot A-02", "Carrot", "Completed"], ["Today, 08:15", "Water", "Plot A-01", "Tomato", "Completed"], ["Yesterday", "Fertilize", "Plot B-01", "Corn", "Completed"], ["Sep 04", "Plant", "Plot A-01", "Tomato", "Completed"], ["Sep 03", "Rent", "Plot A-01", "—", "Completed"]];
-  return <div className="content"><div className="pageIntro"><h2>Farming History</h2><p>A record of your previous farming actions.</p></div><div className="tableCard"><table><thead><tr><th>Time</th><th>Action</th><th>Plot</th><th>Crop</th><th>Status</th></tr></thead><tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j}>{j === 4 ? <span className="success">{c}</span> : c}</td>)}</tr>)}</tbody></table></div></div>
+function HistoryPage({ history, setHistory }) {
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("All");
+
+  const actions = [
+    "All",
+    "Rent",
+    "Plant",
+    "Water",
+    "Fertilize",
+    "Harvest",
+    "Import Stock",
+    "Export Stock"
+  ];
+
+  const filteredHistory = history.filter(item => {
+    const keyword = search.toLowerCase();
+
+    const matchesSearch =
+      item.action.toLowerCase().includes(keyword) ||
+      item.plot.toLowerCase().includes(keyword) ||
+      item.crop.toLowerCase().includes(keyword);
+
+    const matchesFilter =
+      filter === "All" ||
+      item.action === filter;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  const totalActivities = history.length;
+
+  const harvestCount = history.filter(
+    item => item.action === "Harvest"
+  ).length;
+
+  const plantCount = history.filter(
+    item => item.action === "Plant"
+  ).length;
+
+  const completedCount = history.filter(
+    item => item.status === "Completed"
+  ).length;
+
+  function formatDate(timestamp) {
+    const date = new Date(timestamp);
+
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric"
+    });
+  }
+
+  function formatTime(timestamp) {
+    const date = new Date(timestamp);
+
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  function getActionIcon(action) {
+    switch (action) {
+      case "Harvest":
+        return <Wheat size={17} />;
+
+      case "Plant":
+        return <Sprout size={17} />;
+
+      case "Water":
+        return <Droplets size={17} />;
+
+      case "Fertilize":
+        return <Leaf size={17} />;
+
+      case "Rent":
+        return <LayoutDashboard size={17} />;
+
+      case "Import Stock":
+        return <ArrowDownToLine size={17} />;
+
+      case "Export Stock":
+        return <ArrowUpFromLine size={17} />;
+
+      default:
+        return <History size={17} />;
+    }
+  }
+
+  function getActionClass(action) {
+    return action
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+  }
+
+  function clearHistory() {
+    if (
+      window.confirm(
+        "Are you sure you want to clear all farming history?"
+      )
+    ) {
+      setHistory([]);
+    }
+  }
+  return (
+    <div className="content historyPage">
+      {/* HEADER */}
+      <div className="historyHeader">
+        <div className="pageIntro">
+          <h2>Farming History</h2>
+          <p>
+            Track every activity performed on your farm.
+          </p>
+        </div>
+        {history.length > 0 && (
+          <button
+            className="historyClearBtn"
+            onClick={clearHistory}
+          >
+            <X size={16} />
+            Clear History
+          </button>
+        )}
+      </div>
+      {/* STATISTICS */}
+      <section className="historyStats">
+        <div className="historyStatCard">
+          <div className="historyStatIcon">
+            <History size={21} />
+          </div>
+          <div>
+            <strong>{totalActivities}</strong>
+            <span>Total Activities</span>
+          </div>
+        </div>
+        <div className="historyStatCard">
+          <div className="historyStatIcon harvest">
+            <Wheat size={21} />
+          </div>
+          <div>
+            <strong>{harvestCount}</strong>
+            <span>Harvests</span>
+          </div>
+        </div>
+        <div className="historyStatCard">
+          <div className="historyStatIcon plant">
+            <Sprout size={21} />
+          </div>
+          <div>
+            <strong>{plantCount}</strong>
+            <span>Planting Activities</span>
+          </div>
+        </div>
+        <div className="historyStatCard">
+          <div className="historyStatIcon successIcon">
+            <CheckCircle2 size={21} />
+          </div>
+          <div>
+            <strong>{completedCount}</strong>
+            <span>Completed</span>
+          </div>
+        </div>
+      </section>
+      {/* FILTER */}
+      <div className="historyToolbar">
+        <div className="historySearch">
+          <Search size={18} />
+          <input
+            type="text"
+            placeholder="Search activity, plot or crop..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="historyFilter">
+          <Filter size={17} />
+          <select
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+          >
+            {actions.map(action => (
+              <option
+                key={action}
+                value={action}
+              >
+                {action === "All"
+                  ? "All Activities"
+                  : action}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      {/* HISTORY CARD */}
+      <div className="historyCard">
+        <div className="historyCardHeader">
+          <div>
+            <h3>Activity Timeline</h3>
+            <p>
+              {filteredHistory.length} activities found
+            </p>
+          </div>
+          <div className="historyLive">
+            <span />
+            Live Record
+          </div>
+        </div>
+        {filteredHistory.length > 0 ? (
+          <div className="historyTimeline">
+            {filteredHistory.map((item, index) => (
+              <div
+                className="historyItem"
+                key={item.id}
+              >
+                {/* TIMELINE */}
+                <div className="timelineLine">
+                  <div
+                    className={`historyActionIcon ${getActionClass(
+                      item.action
+                    )}`}
+                  >
+                    {getActionIcon(item.action)}
+                  </div>
+                  {index !== filteredHistory.length - 1 && (
+                    <div className="timelineConnector" />
+                  )}
+                </div>
+                {/* CONTENT */}
+                <div className="historyItemContent">
+                  <div className="historyItemTop">
+                    <div>
+                      <div className="historyActionName">
+                        {item.action}
+                      </div>
+                      <div className="historyItemMeta">
+                        <span>
+                          <LayoutDashboard size={13} />
+                          {item.plot}
+                        </span>
+                        <span>
+                          <Leaf size={13} />
+                          {item.crop}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="historyStatus">
+                      <CheckCircle2 size={13} />
+                      {item.status}
+                    </span>
+                  </div>
+                  <p className="historyDetails">
+                    {item.details}
+                  </p>
+                  <div className="historyDate">
+                    <CalendarDays size={14} />
+                    {formatDate(item.timestamp)}
+                    <span>•</span>
+                    {formatTime(item.timestamp)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="historyEmpty">
+            <div className="historyEmptyIcon">
+              <History size={38} />
+            </div>
+            <h3>No activity found</h3>
+            <p>
+              Your farming activities will appear here.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function Farmer({ automation, setAutomation }) {
