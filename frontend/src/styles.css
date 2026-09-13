@@ -244,3 +244,1015 @@
     font-size: 24px;
   }
 }
+
+
+/* ================================
+   INVENTORY MANAGEMENT
+================================ */
+
+.inventoryPage {
+  max-width: 1400px;
+}
+
+.inventoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.inventoryHeader .pageIntro {
+  margin-bottom: 0;
+}
+
+.inventoryImportBtn {
+  white-space: nowrap;
+}
+
+/* ---------- STATISTICS ---------- */
+
+.inventoryStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.inventoryStat {
+  background: #fff;
+  border: 1px solid #e5e9e3;
+  border-radius: 15px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 90px;
+}
+
+.inventoryStatIcon {
+  width: 45px;
+  height: 45px;
+  border-radius: 12px;
+  background: #edf6ed;
+  color: #347d48;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.inventoryStat strong {
+  display: block;
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.inventoryStat span {
+  display: block;
+  color: #89928a;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.inventoryStat.warning .inventoryStatIcon {
+  background: #fff4df;
+  color: #b47b27;
+}
+
+/* ---------- TOOLBAR ---------- */
+
+.inventoryToolbar {
+  background: #fff;
+  border: 1px solid #e5e9e3;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.inventorySearch {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #f7f9f6;
+  border: 1px solid #e1e6e0;
+  border-radius: 9px;
+  padding: 0 12px;
+  color: #7c877e;
+}
+
+.inventorySearch input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  padding: 10px 0;
+  color: #26352b;
+}
+
+.inventorySearch input::placeholder {
+  color: #a1aaa3;
+}
+
+.inventoryFilter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #e1e6e0;
+  border-radius: 9px;
+  background: #fff;
+  padding: 0 11px;
+  color: #69746b;
+}
+
+.inventoryFilter select {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 10px 5px;
+  color: #4f5b51;
+  cursor: pointer;
+}
+
+/* ---------- TABLE ---------- */
+
+.inventoryTableCard {
+  background: #fff;
+  border: 1px solid #e5e9e3;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.inventoryTableHead {
+  padding: 19px 20px;
+  border-bottom: 1px solid #edf0ec;
+}
+
+.inventoryTableHead h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.inventoryTableHead p {
+  margin: 0;
+  font-size: 12px;
+  color: #8b958d;
+}
+
+.inventoryTableWrap {
+  overflow-x: auto;
+}
+
+.inventoryTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 950px;
+  font-size: 13px;
+}
+
+.inventoryTable th {
+  background: #fafbfa;
+  color: #7b857d;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  font-weight: 700;
+  padding: 13px 18px;
+  text-align: left;
+  border-bottom: 1px solid #edf0ec;
+}
+
+.inventoryTable td {
+  padding: 15px 18px;
+  border-bottom: 1px solid #f0f2ef;
+  vertical-align: middle;
+}
+
+.inventoryTable tbody tr {
+  transition: background .15s ease;
+}
+
+.inventoryTable tbody tr:hover {
+  background: #fbfcfa;
+}
+
+.inventoryTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* ---------- PRODUCT ---------- */
+
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 180px;
+}
+
+.productIcon {
+  width: 43px;
+  height: 43px;
+  border-radius: 11px;
+  background: #f3f5ee;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.productCell b {
+  display: block;
+  font-size: 13px;
+}
+
+.productCell span {
+  display: block;
+  color: #929b93;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.categoryTag {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: #f1f5ef;
+  color: #5c695e;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.quantityValue {
+  font-size: 15px;
+  color: #26352b;
+}
+
+.unitText {
+  color: #929b93;
+  font-size: 11px;
+}
+
+/* ---------- STOCK LEVEL ---------- */
+
+.stockLevel {
+  width: 115px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stockBar {
+  flex: 1;
+  height: 6px;
+  border-radius: 20px;
+  background: #edf0ec;
+  overflow: hidden;
+}
+
+.stockBar i {
+  display: block;
+  height: 100%;
+  background: #5aa765;
+  border-radius: 20px;
+}
+
+.stockLevel span {
+  min-width: 30px;
+  font-size: 10px;
+  color: #7e897f;
+}
+
+/* ---------- DATE ---------- */
+
+.harvestDate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #68736a;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* ---------- STATUS ---------- */
+
+.inventoryStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.inventoryStatus.good {
+  background: #e8f4e9;
+  color: #287542;
+}
+
+.inventoryStatus.low {
+  background: #fff4dc;
+  color: #9b6a20;
+}
+
+.inventoryStatus.out {
+  background: #f9e9e7;
+  color: #b84c40;
+}
+
+/* ---------- ACTION ---------- */
+
+.inventoryActions {
+  display: flex;
+  gap: 6px;
+}
+
+.tableAction {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: .15s;
+}
+
+.importAction {
+  border: 1px solid #d9e8da;
+  background: #edf6ed;
+  color: #287542;
+}
+
+.importAction:hover {
+  background: #dfeee0;
+}
+
+.exportAction {
+  border: 1px solid #e2e5e2;
+  background: #fff;
+  color: #69746b;
+}
+
+.exportAction:hover:not(:disabled) {
+  background: #f3f5f2;
+}
+
+.tableAction:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+/* ---------- EMPTY ---------- */
+
+.emptyInventory {
+  padding: 65px 20px;
+  text-align: center;
+  color: #8a948c;
+}
+
+.emptyInventory svg {
+  margin-bottom: 10px;
+}
+
+.emptyInventory h3 {
+  margin: 0 0 5px;
+  color: #556158;
+  font-size: 16px;
+}
+
+.emptyInventory p {
+  margin: 0;
+  font-size: 12px;
+}
+
+/* ---------- MODAL ---------- */
+
+.inventoryModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(27, 39, 30, .38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.inventoryModal {
+  width: min(500px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 17px;
+  box-shadow: 0 20px 60px rgba(20, 35, 23, .18);
+  padding: 22px;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.modalHeader h3 {
+  margin: 0 0 4px;
+  font-size: 19px;
+}
+
+.modalHeader p {
+  margin: 0;
+  color: #89928a;
+  font-size: 12px;
+}
+
+.modalClose {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: #f3f5f2;
+  color: #657066;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.modalClose:hover {
+  background: #e9ece8;
+}
+
+.inventoryModal form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.inventoryModal label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #536056;
+}
+
+.inventoryModal input,
+.inventoryModal select,
+.inventoryModal textarea {
+  width: 100%;
+  border: 1px solid #dfe5df;
+  border-radius: 9px;
+  outline: none;
+  background: #fff;
+  padding: 10px 11px;
+  color: #26352b;
+  resize: vertical;
+}
+
+.inventoryModal input:focus,
+.inventoryModal select:focus,
+.inventoryModal textarea:focus {
+  border-color: #65a16d;
+  box-shadow: 0 0 0 3px rgba(80, 145, 91, .09);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  gap: 12px;
+}
+
+.exportProductInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  background: #f6f8f5;
+  border-radius: 11px;
+}
+
+.exportProductInfo b {
+  display: block;
+}
+
+.exportProductInfo span {
+  display: block;
+  margin-top: 3px;
+  color: #89928a;
+  font-size: 11px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  padding-top: 5px;
+}
+
+.secondaryBtn {
+  border: 1px solid #dfe5df;
+  background: #fff;
+  color: #5f6b62;
+  border-radius: 9px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.secondaryBtn:hover {
+  background: #f5f7f4;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 1000px) {
+
+  .inventoryStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .inventoryHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .inventoryImportBtn {
+    width: 100%;
+  }
+
+  .inventoryToolbar {
+    flex-direction: column;
+  }
+
+  .inventorySearch {
+    width: 100%;
+  }
+
+  .inventoryFilter {
+    width: 100%;
+  }
+
+  .inventoryFilter select {
+    width: 100%;
+  }
+
+}
+
+@media (max-width: 560px) {
+
+  .inventoryStats {
+    grid-template-columns: 1fr;
+  }
+
+  .inventoryModal {
+    padding: 18px;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================================
+   FARMING HISTORY
+========================================= */
+
+.historyPage {
+  max-width: 1400px;
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.historyHeader .pageIntro {
+  margin-bottom: 0;
+}
+
+.historyClearBtn {
+  border: 1px solid #e5e9e3;
+  background: #fff;
+  color: #68736a;
+  border-radius: 9px;
+  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.historyClearBtn:hover {
+  background: #fff6f4;
+  color: #b84c40;
+  border-color: #f0d8d4;
+}
+
+
+/* =========================================
+   HISTORY STATISTICS
+========================================= */
+
+.historyStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.historyStatCard {
+  background: #fff;
+  border: 1px solid #e5e9e3;
+  border-radius: 15px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 92px;
+  transition: .2s ease;
+}
+
+.historyStatCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(45, 73, 49, .07);
+}
+
+.historyStatIcon {
+  width: 45px;
+  height: 45px;
+  border-radius: 12px;
+  background: #edf6ed;
+  color: #347d48;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.historyStatIcon.harvest {
+  background: #fff4df;
+  color: #ad7728;
+}
+
+.historyStatIcon.plant {
+  background: #edf5e8;
+  color: #4c8d48;
+}
+
+.historyStatIcon.successIcon {
+  background: #e8f4e9;
+  color: #287542;
+}
+
+.historyStatCard strong {
+  display: block;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.historyStatCard span {
+  display: block;
+  color: #89928a;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+
+/* =========================================
+   TOOLBAR
+========================================= */
+
+.historyToolbar {
+  background: #fff;
+  border: 1px solid #e5e9e3;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.historySearch {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #f7f9f6;
+  border: 1px solid #e1e6e0;
+  border-radius: 9px;
+  padding: 0 12px;
+  color: #7c877e;
+}
+
+.historySearch input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  padding: 10px 0;
+  color: #26352b;
+}
+
+.historySearch input::placeholder {
+  color: #a1aaa3;
+}
+
+.historyFilter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #e1e6e0;
+  border-radius: 9px;
+  background: #fff;
+  padding: 0 11px;
+  color: #69746b;
+}
+
+.historyFilter select {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 10px 5px;
+  color: #4f5b51;
+  cursor: pointer;
+}
+
+
+/* =========================================
+   HISTORY CARD
+========================================= */
+
+.historyCard {
+  background: #fff;
+  border: 1px solid #e5e9e3;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.historyCardHeader {
+  padding: 19px 21px;
+  border-bottom: 1px solid #edf0ec;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.historyCardHeader h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.historyCardHeader p {
+  margin: 0;
+  font-size: 12px;
+  color: #8b958d;
+}
+
+.historyLive {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #347d48;
+  background: #edf6ed;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.historyLive span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4f985b;
+}
+
+
+/* =========================================
+   TIMELINE
+========================================= */
+
+.historyTimeline {
+  padding: 22px 24px;
+}
+
+.historyItem {
+  display: flex;
+  gap: 15px;
+}
+
+.timelineLine {
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.historyActionIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: #edf6ed;
+  color: #347d48;
+  border: 4px solid #f8faf7;
+  position: relative;
+  z-index: 2;
+}
+
+.historyActionIcon.harvest {
+  background: #fff4df;
+  color: #ad7728;
+}
+
+.historyActionIcon.plant {
+  background: #edf5e8;
+  color: #4c8d48;
+}
+
+.historyActionIcon.water {
+  background: #e9f4f8;
+  color: #43849b;
+}
+
+.historyActionIcon.fertilize {
+  background: #f0edf8;
+  color: #7662a5;
+}
+
+.historyActionIcon.rent {
+  background: #edf1f8;
+  color: #536f9e;
+}
+
+.historyActionIcon.import-stock {
+  background: #eaf5ea;
+  color: #347d48;
+}
+
+.historyActionIcon.export-stock {
+  background: #f4f1e9;
+  color: #8a7040;
+}
+
+.timelineConnector {
+  width: 2px;
+  flex: 1;
+  min-height: 38px;
+  background: #e6ebe5;
+}
+
+.historyItemContent {
+  flex: 1;
+  padding: 1px 0 25px;
+  border-bottom: 1px solid #f0f2ef;
+  margin-bottom: 20px;
+}
+
+.historyItem:last-child .historyItemContent {
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+
+.historyItemTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.historyActionName {
+  font-size: 15px;
+  font-weight: 800;
+  color: #26352b;
+}
+
+.historyItemMeta {
+  display: flex;
+  gap: 15px;
+  margin-top: 7px;
+}
+
+.historyItemMeta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #7c877e;
+  font-size: 12px;
+}
+
+.historyStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #e8f4e9;
+  color: #287542;
+  border-radius: 20px;
+  padding: 5px 9px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.historyDetails {
+  margin: 11px 0 8px;
+  color: #69746b;
+  font-size: 12px;
+}
+
+.historyDate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #929b93;
+  font-size: 11px;
+}
+
+
+/* =========================================
+   EMPTY
+========================================= */
+
+.historyEmpty {
+  padding: 70px 20px;
+  text-align: center;
+}
+
+.historyEmptyIcon {
+  width: 70px;
+  height: 70px;
+  border-radius: 18px;
+  background: #edf6ed;
+  color: #347d48;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 15px;
+}
+
+.historyEmpty h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: #4e5b51;
+}
+
+.historyEmpty p {
+  margin: 0;
+  font-size: 12px;
+  color: #909a92;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+  .historyStats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .historyHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .historyStats {
+    grid-template-columns: 1fr;
+  }
+
+  .historyToolbar {
+    flex-direction: column;
+  }
+
+  .historySearch {
+    min-width: 0;
+  }
+
+  .historyItemTop {
+    flex-direction: column;
+  }
+
+  .historyItemMeta {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .historyTimeline {
+    padding: 18px 15px;
+  }
+}
